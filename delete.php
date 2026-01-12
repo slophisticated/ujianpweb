@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: http://localhost:3000");
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
@@ -19,14 +19,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
     $id = end($parts);
 
     if (is_numeric($id)) {
-        $sql = "DELETE FROM barang WHERE id='$id'";
-        if (mysqli_query($koneksi, $sql)) {
+        $sql = "DELETE FROM act1 WHERE id=?";
+        $stmt = mysqli_prepare($koneksi, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        
+        if (mysqli_stmt_execute($stmt)) {
             $response['status'] = 'success';
             $response['message'] = "Data dengan ID $id berhasil dihapus.";
         } else {
             $response['status'] = 'error';
-            $response['message'] = "Error: $sql . mysqli_error($koneksi)";
+            $response['message'] = "Error: " . mysqli_stmt_error($stmt);
         }
+        mysqli_stmt_close($stmt);
     } else {
         $response['status'] = 'error';
         $response['message'] = "ID tidak valid.";

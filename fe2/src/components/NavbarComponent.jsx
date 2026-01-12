@@ -43,7 +43,7 @@ const NavbarComponent = () => {
               <li>
                 <a
                   className="px-4 py-2 rounded-md text-slate-200 hover:bg-slate-800 transition"
-                  href="/data_barang"
+                  href="/data_mhs"
                 >
                   Data Mahasiswa
                 </a>

@@ -1,5 +1,5 @@
 import HomePage from "./pages/HomePage";
-import DataBarangPage from "./pages/DataBarangPage";
+import DataMahasiswaPage from "./pages/DataMahasiswaPage";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import TambahDataPage from "./pages/TambahDataPage";
 import EditDataPage from "./pages/EditDataPage";
@@ -9,7 +9,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/data_barang" element={<DataBarangPage />} />
+        <Route path="/data_mhs" element={<DataMahasiswaPage />} />
         <Route path="/tambah_data" element={<TambahDataPage />} />
         <Route path="/edit_data/:id" element={<EditDataPage />} />
       </Routes>

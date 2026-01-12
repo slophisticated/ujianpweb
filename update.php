@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json");
-header('Access-Control-Allow-Origin: http://pweb.test');
+header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
@@ -31,35 +31,42 @@ if ($method === 'PUT') {
 
     if (!empty($json)) {
         // PUT JSON
-        $nama_barang   = $json['nama_barang'] ?? '';
-        $kd_barang  = $json['kd_barang'] ?? '';
-        $harga = $json['harga'] ?? '';
+        $nama   = $json['nama'] ?? '';
+        $npm  = $json['npm'] ?? '';
+        $kelas = $json['kelas'] ?? '';
     } elseif (!empty($_POST)) {
         // form-data
-        $nama_barang   = $_POST['nama_barang'] ?? '';
-        $kd_barang  = $_POST['kd_barang'] ?? '';
-        $harga = $_POST['harga'] ?? '';
+        $nama   = $_POST['nama'] ?? '';
+        $npm  = $_POST['npm'] ?? '';
+        $kelas = $_POST['kelas'] ?? '';
     } else {
         // x-www-form-urlencoded
         parse_str($input, $_PUT);
-        $nama_barang   = $_PUT['nama_barang'] ?? '';
-        $kd_barang  = $_PUT['kd_barang'] ?? '';
-        $harga = $_PUT['harga'] ?? '';
+        $nama   = $_PUT['nama'] ?? '';
+        $npm  = $_PUT['npm'] ?? '';
+        $kelas = $_PUT['kelas'] ?? '';
     }
 
     // Validasi
-    if (empty($nama_barang) && empty($kd_barang) && empty($harga)) {
+    if (empty($nama) && empty($npm) && empty($kelas)) {
         $response['status'] = 'error';
         $response['message'] = 'Tidak ada data yang diperbarui.';
+    } elseif (empty($id) || !is_numeric($id)) {
+        $response['status'] = 'error';
+        $response['message'] = 'ID tidak valid.';
     } else {
-        $sql = "UPDATE barang SET nama_barang='$nama_barang', kd_barang='$kd_barang', harga='$harga' WHERE id='$id'";
-        if (mysqli_query($koneksi, $sql)) {
+        $sql = "UPDATE act1 SET nama=?, npm=?, kelas=? WHERE id=?";
+        $stmt = mysqli_prepare($koneksi, $sql);
+        mysqli_stmt_bind_param($stmt, "sssi", $nama, $npm, $kelas, $id);
+        
+        if (mysqli_stmt_execute($stmt)) {
             $response['status'] = 'success';
             $response['message'] = "Data ID $id berhasil diperbarui.";
         } else {
             $response['status'] = 'error';
-            $response['message'] = mysqli_error($koneksi);
+            $response['message'] = mysqli_stmt_error($stmt);
         }
+        mysqli_stmt_close($stmt);
     }
 }
 else {

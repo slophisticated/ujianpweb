@@ -1,107 +1,157 @@
 import React, { useEffect, useState } from "react";
 import Layout from "./Layout";
-import bgImage from "../assets/maja.webp";
-import slide1 from "../assets/badut.jpg";
-import slide2 from "../assets/meme.jpg";
-import slide3 from "../assets/pp1.jpg";
+import bgImage from "../assets/njz.jpg";
+import axios from "axios";
 
 const HomePage = () => {
-  const [barang, setBarang] = useState([]);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("dataBarang");
-
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          setBarang(parsed);
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("/api/read.php");
+        console.log("HomePage fetch response:", response.data);
+        if (response.data && response.data.status === "success") {
+          setData(response.data.data);
         } else {
-          setBarang([]);
+          console.error("Data structure invalid:", response.data);
+          setData([]);
         }
-      } else {
-        setBarang([]);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setData([]);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Error parsing dataBarang:", err);
-      setBarang([]);
-    }
+    };
+
+    fetchData();
   }, []);
 
   return (
     <Layout>
       <div
-        className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center px-4"
+        className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center p-4 md:p-8"
         style={{ backgroundImage: `url(${bgImage})` }}
       >
-        <div className="max-w-5xl w-full bg-slate-900/70 backdrop-blur-lg rounded-2xl shadow-2xl p-8">
+        <div className="w-full max-w-5xl">
+          {/* iOS-style Glass Container */}
+          <div className="ios-glass-container relative overflow-hidden rounded-3xl p-6 md:p-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-center mb-8">
+              <span className="text-white">Data Mahasiswa</span>
+            </h1>
 
-          <div className="relative w-full h-40 md:h-52 lg:h-60 overflow-hidden rounded-xl mb-10">
-            <div className="absolute inset-0 flex slider-track">
-              <img
-                src={slide1}
-                className="w-1/3 h-full object-contain bg-black flex-shrink-0"
-              />
-              <img
-                src={slide2}
-                className="w-1/3 h-full object-contain bg-black flex-shrink-0"
-              />
-              <img
-                src={slide3}
-                className="w-1/3 h-full object-contain bg-black flex-shrink-0"
-              />
-            </div>
-          </div>
-
-          <h1 className="text-4xl font-bold text-center text-purple-400 mb-8">
-            Data Budak Talon
-          </h1>
-
-          {barang.length === 0 && (
-            <p className="text-center text-slate-300">
-              Belum ada data barang.
-            </p>
-          )}
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {barang.map((item) => (
-              <div
-                key={item}
-                className="bg-slate-800 rounded-xl p-6 shadow-md hover:shadow-xl transition"
-              >
-                <h2 className="text-2xl font-semibold text-white mb-2">
-                  {item.nama}
-                </h2>
-                <p className="text-slate-300">Nama_barang: {item.nama_barang}</p>
-                <p className="text-slate-300">Harga: {item.harga}</p>
+            {loading ? (
+              <div className="text-center py-20">
+                <div className="inline-block w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <p className="text-white mt-4">Sedang memuat data...</p>
               </div>
-            ))}
-          </div>
+            ) : data.length === 0 ? (
+              <p className="text-center text-white py-20">
+                Belum ada data mahasiswa.
+              </p>
+            ) : (
+              <>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {data.map((item, index) => (
+                    <div
+                      key={item.id}
+                      className="ios-card group"
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
+                      <h2 className="text-2xl font-semibold text-white mb-3">
+                        {item.nama}
+                      </h2>
+                      <p className="text-white/80 mb-1">NPM: {item.npm}</p>
+                      <p className="text-white/80">Kelas: {item.kelas}</p>
+                    </div>
+                  ))}
+                </div>
 
-          <div className="text-center mt-10">
-            <a
-              href="/data_barang"
-              className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition"
-            >
-              Lihat Data Barang
-            </a>
+                <div className="text-center mt-12">
+                  <a
+                    href="/data_mhs"
+                    className="ios-button group inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-white transition-all duration-300"
+                  >
+                    <span>Lihat Data Mahasiswa</span>
+                    <svg
+                      className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
+                    </svg>
+                  </a>
+                </div>
+              </>
+            )}
           </div>
-
         </div>
       </div>
 
       <style>
         {`
-          .slider-track {
-            width: 300%;
-            animation: slide 25s linear infinite;
+          /* iOS-style Glass Container */
+          .ios-glass-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 
+              0 8px 32px 0 rgba(0, 0, 0, 0.37),
+              inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
           }
 
-          @keyframes slide {
-            0% { transform: translateX(0%); }
-            33% { transform: translateX(-100%); }
-            66% { transform: translateX(-200%); }
-            100% { transform: translateX(0%); }
+          /* iOS Glass Cards */
+          .ios-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            animation: slideUp 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+            box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.25);
+          }
+
+          @keyframes slideUp {
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+
+          .ios-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.35);
+          }
+
+          /* iOS Button */
+          .ios-button {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.3);
+          }
+
+          .ios-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.35);
+            transform: translateY(-2px);
           }
         `}
       </style>

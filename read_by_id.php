@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: http://localhost:3000");
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
@@ -19,8 +19,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $id = end($parts);
 
     if (is_numeric($id)) {
-        $sql = "SELECT * FROM barang WHERE id='$id'";
-        $result = mysqli_query($koneksi, $sql);
+        $sql = "SELECT * FROM act1 WHERE id=?";
+        $stmt = mysqli_prepare($koneksi, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
 
         if (mysqli_num_rows($result) > 0) {
             $row = mysqli_fetch_assoc($result);
@@ -30,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             $response['status'] = 'error';
             $response['message'] = "Data dengan ID $id tidak ditemukan.";
         }
+        mysqli_stmt_close($stmt);
     } else {
         $response['status'] = 'error';
         $response['message'] = "ID tidak valid.";

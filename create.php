@@ -14,18 +14,27 @@ require('connection.php');
 $response = array();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nama_barang = $_POST['nama_barang'];
-    $kd_barang = $_POST['kd_barang'];
-    $harga = $_POST['harga'];
+    $data = json_decode(file_get_contents('php://input'), true);
+    $nama = isset($data['nama']) ? trim($data['nama']) : '';
+    $npm = isset($data['npm']) ? trim($data['npm']) : '';
+    $kelas = isset($data['kelas']) ? trim($data['kelas']) : '';
 
-    $sql = "INSERT INTO barang (nama_barang, kd_barang, harga) VALUES ('$nama_barang', '$kd_barang', '$harga')";
-
-    if (mysqli_query($koneksi, $sql)) {
-        $response['status'] = 'success';
-        $response['message'] = 'Data berhasil ditambahkan.';
-    } else {
+    if (empty($nama) || empty($npm) || empty($kelas)) {
         $response['status'] = 'error';
-        $response['message'] = 'Error: ' . $sql . ' <br> ' . mysqli_error($koneksi);
+        $response['message'] = 'Semua field (nama, npm, kelas) harus diisi.';
+    } else {
+        $sql = "INSERT INTO act1 (nama, npm, kelas) VALUES (?, ?, ?)";
+        $stmt = mysqli_prepare($koneksi, $sql);
+        mysqli_stmt_bind_param($stmt, "sss", $nama, $npm, $kelas);
+
+        if (mysqli_stmt_execute($stmt)) {
+            $response['status'] = 'success';
+            $response['message'] = 'Data berhasil ditambahkan.';
+        } else {
+            $response['status'] = 'error';
+            $response['message'] = 'Error: ' . mysqli_stmt_error($stmt);
+        }
+        mysqli_stmt_close($stmt);
     }
 }
 

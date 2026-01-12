@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
@@ -14,7 +14,7 @@ require('connection.php');
 $response = array();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $sql = "SELECT * FROM barang";
+    $sql = "SELECT * FROM act1";
     $result = mysqli_query($koneksi, $sql);
 
     if (mysqli_num_rows($result) > 0) {
@@ -22,9 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         while ($row = mysqli_fetch_assoc($result)) {
             $item = array(
                 "id" => $row['id'],
-                "kd_barang" => $row['kd_barang'],
-                "nama_barang" => $row['nama_barang'],
-                "harga" => $row['harga']
+                "npm" => $row['npm'],
+                "nama" => $row['nama'],
+                "kelas" => $row['kelas']
             );
             $data[] = $item;
         }
